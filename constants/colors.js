@@ -1,0 +1,21 @@
+// constants/colors.js
+export const Colors = {
+  primary: "#2F9E62",
+  primaryDark: "#237A4B",
+  primaryLight: "#E8F5EE",
+  secondary: "#1A6B9A",
+  accent: "#F4A024",
+  background: "#F8FAF9",
+  card: "#FFFFFF",
+  textPrimary: "#1A1A2E",
+  textSecondary: "#6B7280",
+  textMuted: "#9CA3AF",
+  border: "#E5E7EB",
+  danger: "#EF4444",
+  success: "#10B981",
+  white: "#FFFFFF",
+  black: "#000000",
+  overlay: "rgba(0,0,0,0.4)",
+  gradientStart: "#2F9E62",
+  gradientEnd: "#1A6B9A",
+};
