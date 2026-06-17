@@ -112,7 +112,7 @@ export default function DestinationDetailScreen() {
         {/* Hero image */}
         <View style={{ height: height * 0.45, position: "relative" }}>
           <Image
-            source={{ uri: destination.image }}
+            source={destination.image}
             style={{ width: "100%", height: "100%" }}
             resizeMode="cover"
           />

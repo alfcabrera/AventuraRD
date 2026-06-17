@@ -42,7 +42,7 @@ function GridCard({ item, onPress, index }) {
         }}
       >
         <Image
-          source={{ uri: item.image }}
+          source={item.image}
           style={{ width: "100%", height: 140 }}
           resizeMode="cover"
         />
@@ -206,7 +206,7 @@ export default function ExploreScreen() {
                 }}
               >
                 <Image
-                  source={{ uri: item.image }}
+                  source={item.image}
                   style={{ width: 100, height: 100 }}
                   resizeMode="cover"
                 />

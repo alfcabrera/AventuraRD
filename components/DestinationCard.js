@@ -68,7 +68,7 @@ export default function DestinationCard({
         ]}
       >
         <Image
-          source={{ uri: item.image }}
+          source={item.image}
           style={{ width: 110, height: 110 }}
           resizeMode="cover"
         />
@@ -161,7 +161,7 @@ export default function DestinationCard({
     >
       <View style={{ position: "relative" }}>
         <Image
-          source={{ uri: item.image }}
+          source={item.image}
           style={{ width: "100%", height: variant === "compact" ? 130 : 200 }}
           resizeMode="cover"
         />

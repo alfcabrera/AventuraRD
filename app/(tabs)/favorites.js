@@ -33,7 +33,7 @@ function FavoriteCard({ item, onPress, onRemove, index }) {
         }}
       >
         <Image
-          source={{ uri: item.image }}
+          source={item.image}
           style={{ width: 100, height: 110 }}
           resizeMode="cover"
         />
