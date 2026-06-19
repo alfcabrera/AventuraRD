@@ -334,9 +334,8 @@ export default function DestinationDetailScreen() {
             </Text>
           </View>
           <PrimaryButton
-            title="Reservar ahora"
+            title="Reservar"
             onPress={handleReserve}
-            style={{ flex: 0, paddingHorizontal: 28 }}
           />
         </View>
       </View>
