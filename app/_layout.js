@@ -20,6 +20,7 @@ export default function RootLayout() {
   const loadFavorites = useAppStore((s) => s.loadFavorites);
   const loadAuthState = useAppStore((s) => s.loadAuthState);
   const loadOnboardingState = useAppStore((s) => s.loadOnboardingState);
+  const loadReservations = useAppStore((s) => s.loadReservations);
 
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -30,7 +31,12 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function init() {
-      await Promise.all([loadFavorites(), loadAuthState(), loadOnboardingState()]);
+      await Promise.all([
+        loadFavorites(),
+        loadAuthState(),
+        loadOnboardingState(),
+        loadReservations(),
+      ]);
       if (fontsLoaded) {
         await SplashScreen.hideAsync();
       }
@@ -50,6 +56,27 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
           name="destination/[id]"
+          options={{
+            presentation: "card",
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="reserve/[id]"
+          options={{
+            presentation: "card",
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="reservations/index"
+          options={{
+            presentation: "card",
+            animation: "slide_from_right",
+          }}
+        />
+        <Stack.Screen
+          name="reservations/[id]"
           options={{
             presentation: "card",
             animation: "slide_from_right",

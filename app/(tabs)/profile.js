@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore, reservationStatus } from "@/store/useAppStore";
 import { Colors } from "@constants/colors";
 
 function StatCard({ value, label }) {
@@ -72,7 +72,15 @@ function MenuItem({ icon, label, subtitle, onPress, danger = false }) {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout, favorites } = useAppStore();
+  const { user, logout, favorites, reservations } = useAppStore();
+
+  const totalReservas = reservations.length;
+  const completadas = reservations.filter(
+    (r) => reservationStatus(r) === "completada"
+  ).length;
+  const esteAnio = reservations.filter(
+    (r) => new Date(r.date + "T00:00:00").getFullYear() === new Date().getFullYear()
+  ).length;
 
   const handleLogout = () => {
     Alert.alert(
@@ -146,11 +154,11 @@ export default function ProfileScreen() {
                 justifyContent: "space-around",
               }}
             >
-              <StatCard value={user?.stats?.experiencias || 0} label="Experiencias" />
+              <StatCard value={completadas} label="Experiencias" />
               <View style={{ width: 1, backgroundColor: "rgba(255,255,255,0.25)" }} />
               <StatCard value={favorites.length} label="Favoritos" />
               <View style={{ width: 1, backgroundColor: "rgba(255,255,255,0.25)" }} />
-              <StatCard value={user?.stats?.esteAnio || 0} label="Este año" />
+              <StatCard value={esteAnio} label="Este año" />
             </View>
           </LinearGradient>
         </Animated.View>
@@ -164,8 +172,12 @@ export default function ProfileScreen() {
           <MenuItem
             icon="calendar-outline"
             label="Mis reservas"
-            subtitle="Ver historial de viajes"
-            onPress={() => {}}
+            subtitle={
+              totalReservas > 0
+                ? `${totalReservas} reserva${totalReservas !== 1 ? "s" : ""}`
+                : "Ver historial de viajes"
+            }
+            onPress={() => router.push("/reservations")}
           />
           <MenuItem
             icon="heart-outline"

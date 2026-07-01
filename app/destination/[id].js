@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Dimensions,
   Share,
-  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,7 +18,7 @@ import Animated, {
   FadeInDown,
   SlideInUp,
 } from "react-native-reanimated";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore, reservationStatus } from "@/store/useAppStore";
 import { destinations } from "@/data/destinations";
 import PrimaryButton from "@components/PrimaryButton";
 import { Colors } from "@constants/colors";
@@ -70,9 +69,20 @@ export default function DestinationDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { toggleFavorite, isFavorite } = useAppStore();
+  const reservations = useAppStore((s) => s.reservations);
 
   const destination = destinations.find((d) => d.id === id);
   const favorited = isFavorite(id);
+
+  // Reseñas publicadas por viajeros que ya culminaron esta experiencia.
+  const reviews = reservations
+    .filter((r) => r.destinationId === id && r.review)
+    .map((r) => ({ ...r.review, author: r.contactName || "Aventurero" }));
+
+  // Reserva completada del usuario, aún sin reseñar → mostrar invitación a reseñar.
+  const pendingReview = reservations.find(
+    (r) => r.destinationId === id && reservationStatus(r) === "completada" && !r.review
+  );
 
   if (!destination) {
     return (
@@ -96,14 +106,7 @@ export default function DestinationDetailScreen() {
   };
 
   const handleReserve = () => {
-    Alert.alert(
-      "Reservar experiencia",
-      `¿Deseas reservar "${destination.title}" por $${destination.price}/persona?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Confirmar", onPress: () => Alert.alert("¡Reservado!", "Tu experiencia ha sido reservada. Te contactaremos pronto.") },
-      ]
-    );
+    router.push(`/reserve/${destination.id}`);
   };
 
   return (
@@ -231,6 +234,94 @@ export default function DestinationDetailScreen() {
               {destination.description}
             </Text>
           </Animated.View>
+
+          {/* Pending review prompt (user culminó y volvió a ingresar) */}
+          {pendingReview && (
+            <Animated.View entering={FadeInDown.delay(300).springify()}>
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => router.push(`/reservations/${pendingReview.id}`)}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 12,
+                  backgroundColor: "rgba(244,160,36,0.12)",
+                  borderRadius: 16,
+                  padding: 16,
+                  marginTop: 24,
+                }}
+              >
+                <Ionicons name="star" size={22} color={Colors.accent} />
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", color: "#B37400" }}>
+                    ¿Ya viviste esta experiencia?
+                  </Text>
+                  <Text style={{ fontSize: 12, fontFamily: "Poppins_400Regular", color: Colors.textSecondary, marginTop: 2 }}>
+                    Comparte tu reseña con otros aventureros.
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={Colors.accent} />
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+
+          {/* Reviews */}
+          {reviews.length > 0 && (
+            <Animated.View entering={FadeInDown.delay(320).springify()} style={{ marginTop: 28 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <Text style={{ fontSize: 17, fontFamily: "Poppins_600SemiBold", color: Colors.textPrimary }}>
+                  Reseñas
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: Colors.primaryLight,
+                    borderRadius: 10,
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                  }}
+                >
+                  <Text style={{ fontSize: 12, fontFamily: "Poppins_600SemiBold", color: Colors.primary }}>
+                    {reviews.length}
+                  </Text>
+                </View>
+              </View>
+              {reviews.map((rev, i) => (
+                <View
+                  key={i}
+                  style={{
+                    backgroundColor: Colors.card,
+                    borderRadius: 16,
+                    borderWidth: 1,
+                    borderColor: Colors.border,
+                    padding: 16,
+                    marginBottom: 12,
+                    gap: 8,
+                  }}
+                >
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                    <Text style={{ fontSize: 14, fontFamily: "Poppins_600SemiBold", color: Colors.textPrimary }}>
+                      {rev.author}
+                    </Text>
+                    <View style={{ flexDirection: "row", gap: 2 }}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Ionicons
+                          key={n}
+                          name={n <= rev.rating ? "star" : "star-outline"}
+                          size={13}
+                          color={Colors.accent}
+                        />
+                      ))}
+                    </View>
+                  </View>
+                  {rev.comment ? (
+                    <Text style={{ fontSize: 13, fontFamily: "Poppins_400Regular", color: Colors.textSecondary, lineHeight: 21 }}>
+                      {rev.comment}
+                    </Text>
+                  ) : null}
+                </View>
+              ))}
+            </Animated.View>
+          )}
         </Animated.View>
       </ScrollView>
 
