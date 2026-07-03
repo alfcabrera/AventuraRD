@@ -15,49 +15,57 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { useAppStore } from "@/store/useAppStore";
+import { loginWithEmail, authErrorMessage } from "@/services/firebaseAuth";
 import PrimaryButton from "@components/PrimaryButton";
 import { Colors } from "@constants/colors";
 
+// Validación simple de formato de correo.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function LoginScreen() {
   const router = useRouter();
-  const setUser = useAppStore((s) => s.setUser);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Por favor completa todos los campos");
-      return;
-    }
-    setLoading(true);
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1200));
-    setUser({
-      id: "1",
-      name: "Carlos Rodríguez",
-      email,
-      avatar: "https://i.pravatar.cc/150?img=7",
-      stats: { experiencias: 12, favoritos: 8, esteAnio: 4 },
-    });
-    setLoading(false);
-    router.replace("/(tabs)");
+  // Limpia el error de un campo mientras el usuario lo corrige.
+  const clearError = (field) =>
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+
+  const validate = () => {
+    const next = {};
+    const mail = email.trim();
+    if (!mail) next.email = "Ingresa tu correo electrónico.";
+    else if (!EMAIL_RE.test(mail)) next.email = "El correo no es válido.";
+
+    if (!password) next.password = "Ingresa tu contraseña.";
+    else if (password.length < 6) next.password = "Mínimo 6 caracteres.";
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleLogin = async () => {
+    if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setUser({
-      id: "2",
-      name: "María González",
-      email: "maria@gmail.com",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      stats: { experiencias: 6, favoritos: 3, esteAnio: 2 },
-    });
-    setLoading(false);
-    router.replace("/(tabs)");
+    try {
+      await loginWithEmail({ email, password });
+      // El listener de auth carga los datos del usuario.
+      router.replace("/(tabs)");
+    } catch (e) {
+      Alert.alert("No se pudo iniciar sesión", authErrorMessage(e.code));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = () => {
+    Alert.alert(
+      "Próximamente",
+      "El inicio de sesión con Google estará disponible pronto. Por ahora usa tu correo y contraseña."
+    );
   };
 
   return (
@@ -152,11 +160,14 @@ export default function LoginScreen() {
 
             {/* Email */}
             <Text style={styles.label}>Correo electrónico</Text>
-            <View style={styles.inputWrapper}>
+            <View style={[styles.inputWrapper, errors.email && styles.inputError]}>
               <Ionicons name="mail-outline" size={18} color={Colors.textMuted} />
               <TextInput
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(t) => {
+                  setEmail(t);
+                  clearError("email");
+                }}
                 placeholder="tu@email.com"
                 placeholderTextColor={Colors.textMuted}
                 keyboardType="email-address"
@@ -164,14 +175,20 @@ export default function LoginScreen() {
                 style={styles.input}
               />
             </View>
+            {errors.email ? (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            ) : null}
 
             {/* Password */}
             <Text style={styles.label}>Contraseña</Text>
-            <View style={styles.inputWrapper}>
+            <View style={[styles.inputWrapper, errors.password && styles.inputError]}>
               <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} />
               <TextInput
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(t) => {
+                  setPassword(t);
+                  clearError("password");
+                }}
                 placeholder="••••••••"
                 placeholderTextColor={Colors.textMuted}
                 secureTextEntry={!showPassword}
@@ -185,6 +202,9 @@ export default function LoginScreen() {
                 />
               </TouchableOpacity>
             </View>
+            {errors.password ? (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            ) : null}
 
             {/* Forgot password */}
             <TouchableOpacity style={{ alignSelf: "flex-end", marginBottom: 24 }}>
@@ -263,6 +283,17 @@ const styles = {
     borderWidth: 1,
     borderColor: Colors.border,
     marginBottom: 16,
+  },
+  inputError: {
+    borderColor: Colors.danger,
+    marginBottom: 6,
+  },
+  errorText: {
+    fontSize: 12,
+    fontFamily: "Poppins_400Regular",
+    color: Colors.danger,
+    marginBottom: 10,
+    marginLeft: 4,
   },
   input: {
     flex: 1,

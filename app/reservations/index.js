@@ -1,7 +1,7 @@
 // app/reservations/index.js
-import React from "react";
+import React, { useCallback } from "react";
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -20,7 +20,17 @@ function formatShortDate(iso) {
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// Convierte "14:30" a formato 12h: "2:30 PM".
+function formatTime(hhmm) {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
 const statusConfig = {
+  pendiente: { label: "Pendiente", color: Colors.accent, icon: "hourglass-outline" },
   confirmada: { label: "Confirmada", color: Colors.primary, icon: "checkmark-circle" },
   completada: { label: "Completada", color: Colors.secondary, icon: "flag" },
   cancelada: { label: "Cancelada", color: Colors.danger, icon: "close-circle" },
@@ -87,6 +97,15 @@ function ReservationCard({ reservation, index, onPress }) {
                 <Text style={{ fontSize: 12, fontFamily: "Poppins_400Regular", color: Colors.textSecondary }}>
                   {formatShortDate(reservation.date)}
                 </Text>
+                {reservation.time ? (
+                  <>
+                    <Text style={{ fontSize: 12, color: Colors.textMuted }}>·</Text>
+                    <Ionicons name="time-outline" size={13} color={Colors.textSecondary} />
+                    <Text style={{ fontSize: 12, fontFamily: "Poppins_400Regular", color: Colors.textSecondary }}>
+                      {formatTime(reservation.time)}
+                    </Text>
+                  </>
+                ) : null}
                 <Text style={{ fontSize: 12, color: Colors.textMuted }}>·</Text>
                 <Ionicons name="people-outline" size={13} color={Colors.textSecondary} />
                 <Text style={{ fontSize: 12, fontFamily: "Poppins_400Regular", color: Colors.textSecondary }}>
@@ -155,9 +174,21 @@ function ReservationCard({ reservation, index, onPress }) {
 export default function ReservationsScreen() {
   const router = useRouter();
   const reservations = useAppStore((s) => s.reservations);
+  const loadReservations = useAppStore((s) => s.loadReservations);
 
-  const active = reservations.filter((r) => reservationStatus(r) === "confirmada");
-  const past = reservations.filter((r) => reservationStatus(r) !== "confirmada");
+  // Al enfocar la pantalla, recargamos por si el operador confirmó una reserva.
+  useFocusEffect(
+    useCallback(() => {
+      loadReservations();
+    }, [loadReservations])
+  );
+
+  const isUpcoming = (r) => {
+    const s = reservationStatus(r);
+    return s === "pendiente" || s === "confirmada";
+  };
+  const active = reservations.filter(isUpcoming);
+  const past = reservations.filter((r) => !isUpcoming(r));
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>

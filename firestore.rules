@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Operador único identificado por su correo.
+    // ⚠️ Debe coincidir con OPERATOR_EMAIL en constants/roles.js
+    function isOperator() {
+      return request.auth != null
+        && request.auth.token.email == 'operador@aventurard.com';
+    }
+
+    // Perfil y subcolecciones (favoritos): cada usuario solo lo suyo.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /{sub=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Reservas: el dueño gestiona las suyas; el operador puede ver y confirmar
+    // (actualizar el estado de) las de todos.
+    match /reservations/{resId} {
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if request.auth != null
+        && (resource.data.userId == request.auth.uid || isOperator());
+    }
+  }
+}

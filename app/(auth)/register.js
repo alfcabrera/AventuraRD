@@ -14,35 +14,54 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import { useAppStore } from "@/store/useAppStore";
+import { registerWithEmail, authErrorMessage } from "@/services/firebaseAuth";
 import PrimaryButton from "@components/PrimaryButton";
 import { Colors } from "@constants/colors";
 
+// Validación simple de formato de correo.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function RegisterScreen() {
   const router = useRouter();
-  const setUser = useAppStore((s) => s.setUser);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  // Limpia el error de un campo mientras el usuario lo corrige.
+  const clearError = (field) =>
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+
+  const validate = () => {
+    const next = {};
+    if (!name.trim()) next.name = "Ingresa tu nombre.";
+    else if (name.trim().length < 2) next.name = "El nombre es muy corto.";
+
+    const mail = email.trim();
+    if (!mail) next.email = "Ingresa tu correo electrónico.";
+    else if (!EMAIL_RE.test(mail)) next.email = "El correo no es válido.";
+
+    if (!password) next.password = "Ingresa una contraseña.";
+    else if (password.length < 6) next.password = "Mínimo 6 caracteres.";
+
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert("Error", "Por favor completa todos los campos");
-      return;
-    }
+    if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setUser({
-      id: "3",
-      name,
-      email,
-      avatar: "https://i.pravatar.cc/150?img=12",
-      stats: { experiencias: 0, favoritos: 0, esteAnio: 0 },
-    });
-    setLoading(false);
-    router.replace("/(tabs)");
+    try {
+      await registerWithEmail({ name, email, password });
+      // El listener de auth carga los datos del usuario.
+      router.replace("/(tabs)");
+    } catch (e) {
+      Alert.alert("No se pudo crear la cuenta", authErrorMessage(e.code));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputStyle = {
@@ -63,6 +82,16 @@ export default function RegisterScreen() {
     fontFamily: "Poppins_500Medium",
     color: Colors.textPrimary,
     marginBottom: 8,
+  };
+
+  const errorBorder = { borderColor: Colors.danger, marginBottom: 6 };
+
+  const errorTextStyle = {
+    fontSize: 12,
+    fontFamily: "Poppins_400Regular",
+    color: Colors.danger,
+    marginBottom: 10,
+    marginLeft: 4,
   };
 
   return (
@@ -106,23 +135,30 @@ export default function RegisterScreen() {
             </Text>
 
             <Text style={labelStyle}>Nombre completo</Text>
-            <View style={inputStyle}>
+            <View style={[inputStyle, errors.name && errorBorder]}>
               <Ionicons name="person-outline" size={18} color={Colors.textMuted} />
               <TextInput
                 value={name}
-                onChangeText={setName}
+                onChangeText={(t) => {
+                  setName(t);
+                  clearError("name");
+                }}
                 placeholder="Tu nombre"
                 placeholderTextColor={Colors.textMuted}
                 style={{ flex: 1, fontSize: 14, fontFamily: "Poppins_400Regular", color: Colors.textPrimary, padding: 0 }}
               />
             </View>
+            {errors.name ? <Text style={errorTextStyle}>{errors.name}</Text> : null}
 
             <Text style={labelStyle}>Correo electrónico</Text>
-            <View style={inputStyle}>
+            <View style={[inputStyle, errors.email && errorBorder]}>
               <Ionicons name="mail-outline" size={18} color={Colors.textMuted} />
               <TextInput
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(t) => {
+                  setEmail(t);
+                  clearError("email");
+                }}
                 placeholder="tu@email.com"
                 placeholderTextColor={Colors.textMuted}
                 keyboardType="email-address"
@@ -130,13 +166,17 @@ export default function RegisterScreen() {
                 style={{ flex: 1, fontSize: 14, fontFamily: "Poppins_400Regular", color: Colors.textPrimary, padding: 0 }}
               />
             </View>
+            {errors.email ? <Text style={errorTextStyle}>{errors.email}</Text> : null}
 
             <Text style={labelStyle}>Contraseña</Text>
-            <View style={inputStyle}>
+            <View style={[inputStyle, errors.password && errorBorder]}>
               <Ionicons name="lock-closed-outline" size={18} color={Colors.textMuted} />
               <TextInput
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(t) => {
+                  setPassword(t);
+                  clearError("password");
+                }}
                 placeholder="••••••••"
                 placeholderTextColor={Colors.textMuted}
                 secureTextEntry={!showPassword}
@@ -150,6 +190,9 @@ export default function RegisterScreen() {
                 />
               </TouchableOpacity>
             </View>
+            {errors.password ? (
+              <Text style={errorTextStyle}>{errors.password}</Text>
+            ) : null}
 
             <PrimaryButton
               title="Crear cuenta"

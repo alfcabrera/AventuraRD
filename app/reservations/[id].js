@@ -28,7 +28,17 @@ function formatLongDate(iso) {
   return `${d.getDate()} de ${MONTHS[d.getMonth()]}, ${d.getFullYear()}`;
 }
 
+// Convierte "14:30" a formato 12h: "2:30 PM".
+function formatTime(hhmm) {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
+}
+
 const statusConfig = {
+  pendiente: { label: "Pendiente", color: Colors.accent, icon: "hourglass-outline" },
   confirmada: { label: "Confirmada", color: Colors.primary, icon: "checkmark-circle" },
   completada: { label: "Completada", color: Colors.secondary, icon: "flag" },
   cancelada: { label: "Cancelada", color: Colors.danger, icon: "close-circle" },
@@ -295,6 +305,17 @@ export default function ReservationDetailScreen() {
                 </Text>
               </View>
             </View>
+            {reservation.time ? (
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                <Ionicons name="time-outline" size={18} color={Colors.primary} />
+                <View>
+                  <Text style={{ fontSize: 12, fontFamily: "Poppins_400Regular", color: Colors.textMuted }}>Horario</Text>
+                  <Text style={{ fontSize: 14, fontFamily: "Poppins_500Medium", color: Colors.textPrimary }}>
+                    {formatTime(reservation.time)}
+                  </Text>
+                </View>
+              </View>
+            ) : null}
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <Ionicons name="people-outline" size={18} color={Colors.primary} />
               <View>
@@ -319,7 +340,62 @@ export default function ReservationDetailScreen() {
             />
             <Row label="Tarifa de servicio (10%)" value={`$${reservation.serviceFee}`} />
             <View style={{ height: 1, backgroundColor: Colors.border }} />
-            <Row label="Total pagado" value={`$${reservation.total}`} bold />
+            <Row
+              label={
+                reservation.payment?.status === "pendiente"
+                  ? "Total a pagar"
+                  : "Total pagado"
+              }
+              value={`$${reservation.total}`}
+              bold
+            />
+            {reservation.payment && (
+              <>
+                <View style={{ height: 1, backgroundColor: Colors.border }} />
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <Ionicons
+                      name={
+                        reservation.payment.method === "paypal"
+                          ? "logo-paypal"
+                          : reservation.payment.method === "cash"
+                          ? "cash-outline"
+                          : "card-outline"
+                      }
+                      size={16}
+                      color={Colors.textSecondary}
+                    />
+                    <Text style={{ fontSize: 13, fontFamily: "Poppins_500Medium", color: Colors.textSecondary }}>
+                      {reservation.payment.label}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      backgroundColor:
+                        (reservation.payment.status === "pendiente"
+                          ? Colors.accent
+                          : Colors.primary) + "18",
+                      borderRadius: 20,
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 11,
+                        fontFamily: "Poppins_600SemiBold",
+                        color:
+                          reservation.payment.status === "pendiente"
+                            ? Colors.accent
+                            : Colors.primary,
+                      }}
+                    >
+                      {reservation.payment.status === "pendiente" ? "Pago pendiente" : "Pagado"}
+                    </Text>
+                  </View>
+                </View>
+              </>
+            )}
           </Card>
         </Animated.View>
 
@@ -394,6 +470,32 @@ export default function ReservationDetailScreen() {
                 <PrimaryButton title="Dejar reseña" onPress={() => setReviewOpen(true)} />
               </Card>
             )}
+          </Animated.View>
+        )}
+
+        {/* Pending confirmation: waiting note + cancel */}
+        {status === "pendiente" && (
+          <Animated.View entering={FadeInDown.delay(360).springify()} style={{ gap: 12 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 12,
+                backgroundColor: "rgba(244,160,36,0.12)",
+                borderRadius: 16,
+                padding: 16,
+              }}
+            >
+              <Ionicons name="hourglass-outline" size={20} color={Colors.accent} style={{ marginTop: 2 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 13, fontFamily: "Poppins_600SemiBold", color: "#B37400" }}>
+                  Pendiente de confirmación
+                </Text>
+                <Text style={{ fontSize: 12, fontFamily: "Poppins_400Regular", color: Colors.textSecondary, marginTop: 2, lineHeight: 18 }}>
+                  {reservation.operator?.name || "El operador"} revisará tu solicitud y la confirmará en breve. Te avisaremos cuando esté lista.
+                </Text>
+              </View>
+            </View>
+            <PrimaryButton title="Cancelar reserva" variant="outline" onPress={() => setCancelOpen(true)} />
           </Animated.View>
         )}
 

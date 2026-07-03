@@ -1,12 +1,14 @@
 // app/(tabs)/profile.js
-import React from "react";
-import { View, Text, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Image, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useAppStore, reservationStatus } from "@/store/useAppStore";
+import PrimaryButton from "@components/PrimaryButton";
+import { isOperatorUser } from "@constants/roles";
 import { Colors } from "@constants/colors";
 
 function StatCard({ value, label }) {
@@ -73,6 +75,9 @@ function MenuItem({ icon, label, subtitle, onPress, danger = false }) {
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout, favorites, reservations } = useAppStore();
+  const isOperator = isOperatorUser(user);
+  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const totalReservas = reservations.length;
   const completadas = reservations.filter(
@@ -82,22 +87,14 @@ export default function ProfileScreen() {
     (r) => new Date(r.date + "T00:00:00").getFullYear() === new Date().getFullYear()
   ).length;
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Cerrar sesión",
-      "¿Estás seguro de que quieres cerrar sesión?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Cerrar sesión",
-          style: "destructive",
-          onPress: async () => {
-            await logout();
-            router.replace("/(auth)/login");
-          },
-        },
-      ]
-    );
+  // Modal de confirmación propio: funciona en iOS, Android y Web
+  // (Alert.alert con botones no dispara onPress en React Native Web).
+  const confirmLogout = async () => {
+    setLoggingOut(true);
+    await logout();
+    setLoggingOut(false);
+    setLogoutOpen(false);
+    router.replace("/(auth)/login");
   };
 
   return (
@@ -163,8 +160,23 @@ export default function ProfileScreen() {
           </LinearGradient>
         </Animated.View>
 
+        {/* Operator panel (solo para el operador autorizado) */}
+        {isOperator && (
+          <Animated.View entering={FadeInDown.delay(120).springify()} style={{ paddingHorizontal: 20, marginTop: 24 }}>
+            <Text style={{ fontSize: 13, fontFamily: "Poppins_600SemiBold", color: Colors.textMuted, marginBottom: 12, letterSpacing: 0.8, textTransform: "uppercase" }}>
+              Operador
+            </Text>
+            <MenuItem
+              icon="briefcase-outline"
+              label="Panel de operador"
+              subtitle="Confirmar reservas pendientes"
+              onPress={() => router.push("/operator")}
+            />
+          </Animated.View>
+        )}
+
         {/* Menu items */}
-        <Animated.View entering={FadeInDown.delay(150).springify()} style={{ paddingHorizontal: 20, marginTop: 24 }}>
+        <Animated.View entering={FadeInDown.delay(150).springify()} style={{ paddingHorizontal: 20, marginTop: isOperator ? 8 : 24 }}>
           <Text style={{ fontSize: 13, fontFamily: "Poppins_600SemiBold", color: Colors.textMuted, marginBottom: 12, letterSpacing: 0.8, textTransform: "uppercase" }}>
             Mi cuenta
           </Text>
@@ -206,7 +218,7 @@ export default function ProfileScreen() {
           <MenuItem
             icon="log-out-outline"
             label="Cerrar sesión"
-            onPress={handleLogout}
+            onPress={() => setLogoutOpen(true)}
             danger
           />
         </Animated.View>
@@ -216,6 +228,69 @@ export default function ProfileScreen() {
           AventuraRD v1.0.0
         </Text>
       </ScrollView>
+
+      {/* Logout confirmation modal (multiplataforma) */}
+      <Modal
+        visible={logoutOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLogoutOpen(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.45)",
+            padding: 32,
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: Colors.card,
+              borderRadius: 24,
+              padding: 24,
+              width: "100%",
+              maxWidth: 400,
+              alignItems: "center",
+              gap: 14,
+            }}
+          >
+            <View
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                backgroundColor: "rgba(239,68,68,0.12)",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="log-out-outline" size={30} color={Colors.danger} />
+            </View>
+            <Text style={{ fontSize: 18, fontFamily: "Poppins_700Bold", color: Colors.textPrimary, textAlign: "center" }}>
+              Cerrar sesión
+            </Text>
+            <Text style={{ fontSize: 14, fontFamily: "Poppins_400Regular", color: Colors.textSecondary, textAlign: "center", lineHeight: 21 }}>
+              ¿Estás seguro de que quieres cerrar sesión?
+            </Text>
+            <View style={{ flexDirection: "row", gap: 12, marginTop: 6, width: "100%" }}>
+              <PrimaryButton
+                title="Cancelar"
+                variant="outline"
+                onPress={() => setLogoutOpen(false)}
+                style={{ flex: 1 }}
+              />
+              <PrimaryButton
+                title="Cerrar sesión"
+                onPress={confirmLogout}
+                loading={loggingOut}
+                style={{ flex: 1, backgroundColor: Colors.danger, shadowColor: Colors.danger }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
