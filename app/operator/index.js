@@ -163,9 +163,11 @@ export default function OperatorScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [busyId, setBusyId] = useState(null);
+  const [error, setError] = useState(null);
 
   const load = useCallback(async () => {
     try {
+      setError(null);
       const all = await fetchAllReservations();
       setPending(
         all
@@ -174,6 +176,7 @@ export default function OperatorScreen() {
       );
     } catch (e) {
       console.error("Failed to load reservations for operator", e);
+      setError(e?.code || e?.message || "No se pudieron cargar las reservas");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -226,6 +229,20 @@ export default function OperatorScreen() {
       {loading ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
           <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      ) : error ? (
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 12 }}>
+          <Ionicons name="alert-circle-outline" size={48} color={Colors.danger} />
+          <Text style={{ fontSize: 16, fontFamily: "Poppins_600SemiBold", color: Colors.textPrimary, textAlign: "center" }}>
+            No se pudieron cargar las reservas
+          </Text>
+          <Text style={{ fontSize: 13, fontFamily: "Poppins_400Regular", color: Colors.textSecondary, textAlign: "center" }}>
+            {String(error)}
+            {String(error).includes("permission")
+              ? "\n\n¿Publicaste las reglas de Firestore y estás usando el correo del operador?"
+              : ""}
+          </Text>
+          <PrimaryButton title="Reintentar" onPress={load} style={{ marginTop: 8 }} />
         </View>
       ) : pending.length === 0 ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 12 }}>

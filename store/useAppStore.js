@@ -204,12 +204,18 @@ export const useAppStore = create((set, get) => ({
     // En memoria conservamos la imagen; en Firestore no se guarda el require().
     const { image, ...toStore } = created;
     set({ reservations: [created, ...get().reservations] });
-    if (uid) {
-      try {
-        await saveReservation(uid, toStore);
-      } catch (e) {
-        console.error("Failed to save reservation", e);
-      }
+    if (!uid) {
+      // Sin sesión no podemos persistir: revertimos y avisamos.
+      set({ reservations: get().reservations.filter((r) => r.id !== created.id) });
+      throw new Error("No hay sesión activa para guardar la reserva.");
+    }
+    try {
+      await saveReservation(uid, toStore);
+    } catch (e) {
+      console.error("Failed to save reservation", e);
+      // Revertimos el estado optimista para no dejar reservas "fantasma".
+      set({ reservations: get().reservations.filter((r) => r.id !== created.id) });
+      throw e;
     }
     return created;
   },

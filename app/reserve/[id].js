@@ -178,31 +178,39 @@ export default function ReserveScreen() {
 
   // Crea la reserva con la info de pago y navega a la confirmación.
   const finalizeReservation = async (payment) => {
-    const reservation = await addReservation({
-      destinationId: destination.id,
-      title: destination.title,
-      location: destination.location,
-      category: destination.category,
-      image: destination.image,
-      duration: destination.duration,
-      date: selectedDate,
-      time: selectedTime,
-      people,
-      pricePerPerson: destination.price,
-      subtotal,
-      serviceFee,
-      total,
-      operator,
-      contactName: name.trim(),
-      contactEmail: email.trim(),
-      contactPhone: phone.trim(),
-      payment,
-    });
+    try {
+      const reservation = await addReservation({
+        destinationId: destination.id,
+        title: destination.title,
+        location: destination.location,
+        category: destination.category,
+        image: destination.image,
+        duration: destination.duration,
+        date: selectedDate,
+        time: selectedTime,
+        people,
+        pricePerPerson: destination.price,
+        subtotal,
+        serviceFee,
+        total,
+        operator,
+        contactName: name.trim(),
+        contactEmail: email.trim(),
+        contactPhone: phone.trim(),
+        payment,
+      });
 
-    router.replace({
-      pathname: "/reservations/[id]",
-      params: { id: reservation.id, justBooked: "1" },
-    });
+      router.replace({
+        pathname: "/reservations/[id]",
+        params: { id: reservation.id, justBooked: "1" },
+      });
+    } catch (e) {
+      Alert.alert(
+        "No se pudo guardar la reserva",
+        (e?.code || e?.message || String(e)) +
+          "\n\nSi dice \"permission-denied\", revisa que publicaste las reglas de Firestore con el bloque de 'reservations'."
+      );
+    }
   };
 
   // Simula el procesamiento del pago (~1.6s) antes de confirmar.
