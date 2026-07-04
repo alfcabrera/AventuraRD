@@ -235,6 +235,80 @@ export default function DestinationDetailScreen() {
             </Text>
           </Animated.View>
 
+          {/* Nivel de seguridad y condiciones */}
+          {destination.safety && (
+            <Animated.View entering={FadeInDown.delay(260).springify()} style={{ marginTop: 28 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <Ionicons name="shield-checkmark-outline" size={18} color={Colors.secondary} />
+                <Text style={{ fontSize: 17, fontFamily: "Poppins_600SemiBold", color: Colors.textPrimary }}>
+                  Nivel de seguridad y condiciones
+                </Text>
+              </View>
+              <View
+                style={{
+                  backgroundColor: Colors.card,
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                  padding: 16,
+                  gap: 12,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 6,
+                    alignSelf: "flex-start",
+                    backgroundColor: diffConf.color + "18",
+                    borderRadius: 20,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                  }}
+                >
+                  <Ionicons name={diffConf.icon} size={14} color={diffConf.color} />
+                  <Text style={{ fontSize: 13, fontFamily: "Poppins_600SemiBold", color: diffConf.color }}>
+                    Nivel: {destination.difficulty}
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 14, fontFamily: "Poppins_400Regular", color: Colors.textSecondary, lineHeight: 22 }}>
+                  {destination.safety}
+                </Text>
+              </View>
+            </Animated.View>
+          )}
+
+          {/* Recomendaciones */}
+          {destination.recommendations?.length > 0 && (
+            <Animated.View entering={FadeInDown.delay(280).springify()} style={{ marginTop: 24 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                <Ionicons name="bulb-outline" size={18} color={Colors.accent} />
+                <Text style={{ fontSize: 17, fontFamily: "Poppins_600SemiBold", color: Colors.textPrimary }}>
+                  Recomendaciones
+                </Text>
+              </View>
+              <View
+                style={{
+                  backgroundColor: Colors.card,
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: Colors.border,
+                  padding: 16,
+                  gap: 12,
+                }}
+              >
+                {destination.recommendations.map((rec, i) => (
+                  <View key={i} style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+                    <Ionicons name="checkmark-circle" size={18} color={Colors.primary} style={{ marginTop: 1 }} />
+                    <Text style={{ flex: 1, fontSize: 14, fontFamily: "Poppins_400Regular", color: Colors.textSecondary, lineHeight: 21 }}>
+                      {rec}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </Animated.View>
+          )}
+
           {/* Pending review prompt (user culminó y volvió a ingresar) */}
           {pendingReview && (
             <Animated.View entering={FadeInDown.delay(300).springify()}>

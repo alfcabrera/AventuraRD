@@ -21,6 +21,7 @@ import {
   operatorForCategory,
 } from "@/store/useAppStore";
 import { destinations } from "@/data/destinations";
+import { sendReservationEmail } from "@/services/email";
 import PrimaryButton from "@components/PrimaryButton";
 import { Colors } from "@constants/colors";
 import {
@@ -199,6 +200,11 @@ export default function ReserveScreen() {
         contactPhone: phone.trim(),
         payment,
       });
+
+      // Envío del correo de confirmación (no bloquea la navegación).
+      sendReservationEmail(reservation, destination).catch((err) =>
+        console.warn("No se pudo enviar el correo de reserva:", err?.message || err)
+      );
 
       router.replace({
         pathname: "/reservations/[id]",
