@@ -70,6 +70,8 @@ export default function DestinationDetailScreen() {
   const router = useRouter();
   const { toggleFavorite, isFavorite } = useAppStore();
   const reservations = useAppStore((s) => s.reservations);
+  const [heroIndex, setHeroIndex] = React.useState(0);
+  const heroRef = React.useRef(null);
 
   const destination = destinations.find((d) => d.id === id);
   const favorited = isFavorite(id);
@@ -94,6 +96,15 @@ export default function DestinationDetailScreen() {
 
   const diffConf = difficultyConfig[destination.difficulty] || difficultyConfig["Moderado"];
 
+  // Carrusel: imagen principal + galería de imágenes reales de la actividad.
+  const heroImages = [destination.image, ...(destination.gallery || [])];
+
+  const goToHero = (i) => {
+    const idx = Math.max(0, Math.min(heroImages.length - 1, i));
+    heroRef.current?.scrollTo({ x: idx * width, animated: true });
+    setHeroIndex(idx);
+  };
+
   const handleShare = async () => {
     try {
       await Share.share({
@@ -112,21 +123,140 @@ export default function DestinationDetailScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
-        {/* Hero image */}
+        {/* Hero image carousel */}
         <View style={{ height: height * 0.45, position: "relative" }}>
-          <Image
-            source={destination.image}
-            style={{ width: "100%", height: "100%" }}
-            resizeMode="cover"
-          />
+          <ScrollView
+            ref={heroRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={(e) =>
+              setHeroIndex(Math.round(e.nativeEvent.contentOffset.x / width))
+            }
+          >
+            {heroImages.map((img, i) => (
+              <Image
+                key={i}
+                source={img}
+                style={{ width, height: height * 0.45 }}
+                resizeMode="cover"
+              />
+            ))}
+          </ScrollView>
+
+          {/* Flechas anterior / siguiente */}
+          {heroImages.length > 1 && (
+            <View
+              pointerEvents="box-none"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 12,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => goToHero(heroIndex - 1)}
+                disabled={heroIndex === 0}
+                activeOpacity={0.8}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(0,0,0,0.4)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: heroIndex === 0 ? 0 : 1,
+                }}
+              >
+                <Ionicons name="chevron-back" size={22} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => goToHero(heroIndex + 1)}
+                disabled={heroIndex === heroImages.length - 1}
+                activeOpacity={0.8}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "rgba(0,0,0,0.4)",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: heroIndex === heroImages.length - 1 ? 0 : 1,
+                }}
+              >
+                <Ionicons name="chevron-forward" size={22} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          )}
           <LinearGradient
+            pointerEvents="none"
             colors={["rgba(0,0,0,0.35)", "transparent", "transparent"]}
             style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
           />
           <LinearGradient
+            pointerEvents="none"
             colors={["transparent", "rgba(0,0,0,0.4)"]}
             style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 120 }}
           />
+
+          {/* Indicadores del carrusel */}
+          {heroImages.length > 1 && (
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                bottom: 44,
+                left: 0,
+                right: 0,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              {heroImages.map((_, i) => (
+                <View
+                  key={i}
+                  style={{
+                    width: i === heroIndex ? 20 : 6,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: i === heroIndex ? "#fff" : "rgba(255,255,255,0.55)",
+                  }}
+                />
+              ))}
+            </View>
+          )}
+
+          {/* Contador de fotos */}
+          {heroImages.length > 1 && (
+            <View
+              pointerEvents="none"
+              style={{
+                position: "absolute",
+                top: 66,
+                right: 20,
+                backgroundColor: "rgba(0,0,0,0.45)",
+                borderRadius: 12,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 4,
+              }}
+            >
+              <Ionicons name="images-outline" size={12} color="#fff" />
+              <Text style={{ fontSize: 11, fontFamily: "Poppins_500Medium", color: "#fff" }}>
+                {heroIndex + 1}/{heroImages.length}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Content card */}

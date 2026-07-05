@@ -11,6 +11,10 @@ export const destinations = [
     location: "Punta Cana, La Altagracia",
     category: "Aventura",
     image: require("../assets/destinations/01-skydive.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g01a.jpg"),
+      require("../assets/destinations/gallery/g01b.jpg"),
+    ],
     safety:
       "Actividad de riesgo alto operada con instructores certificados y equipo homologado. Peso máximo 100 kg. No apta para embarazadas ni personas con problemas cardíacos, de espalda o de presión arterial.",
     recommendations: [
@@ -36,6 +40,10 @@ export const destinations = [
     location: "Playa Macao, La Altagracia",
     category: "Aventura",
     image: require("../assets/destinations/02-buggies.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g02a.jpg"),
+      require("../assets/destinations/gallery/g02b.jpg"),
+    ],
     safety:
       "Recorrido off-road de dificultad moderada. Uso obligatorio de casco y gafas. Para conducir se requieren 18 años y licencia; los menores solo pueden ir como acompañantes.",
     recommendations: [
@@ -61,6 +69,10 @@ export const destinations = [
     location: "Miches, El Seibo",
     category: "Aventura",
     image: require("../assets/destinations/03-parapente.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g03a.jpg"),
+      require("../assets/destinations/gallery/g03b.jpg"),
+    ],
     safety:
       "Vuelo biplaza con piloto certificado, sujeto a las condiciones del viento. Peso máximo 110 kg. No recomendado para problemas cardíacos, de movilidad o vértigo severo.",
     recommendations: [
@@ -86,6 +98,10 @@ export const destinations = [
     location: "Bayahíbe, La Altagracia",
     category: "Ecoturismo",
     image: require("../assets/destinations/04-cotubanama.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g04a.jpg"),
+      require("../assets/destinations/gallery/g04b.jpg"),
+    ],
     safety:
       "Senderismo de dificultad moderada en área protegida, acompañado por guardaparques. Recorrido por cuevas y manglares; se requiere condición física básica.",
     recommendations: [
@@ -111,6 +127,10 @@ export const destinations = [
     location: "Punta Cana, La Altagracia",
     category: "Ecoturismo",
     image: require("../assets/destinations/05-ojos-indigenas.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g05a.jpg"),
+      require("../assets/destinations/gallery/g05b.jpg"),
+    ],
     safety:
       "Sendero de nivel fácil apto para todas las edades dentro de una reserva privada. El baño está permitido solo en las lagunas habilitadas.",
     recommendations: [
@@ -136,6 +156,10 @@ export const destinations = [
     location: "Cap Cana, La Altagracia",
     category: "Ecoturismo",
     image: require("../assets/destinations/06-hoyo-azul.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g06a.jpg"),
+      require("../assets/destinations/gallery/g06b.jpg"),
+    ],
     safety:
       "Sendero de dificultad moderada hasta el cenote, con descenso por escaleras. El baño es bajo supervisión y hay chalecos disponibles.",
     recommendations: [
@@ -161,6 +185,10 @@ export const destinations = [
     location: "Miches, Hato Mayor",
     category: "Ecoturismo",
     image: require("../assets/destinations/07-salto-jalda.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g07a.jpg"),
+      require("../assets/destinations/gallery/g07b.jpg"),
+    ],
     safety:
       "Excursión exigente de senderismo y travesía a caballo que requiere buena condición física. No apta para embarazadas ni personas con problemas cardíacos o de rodilla.",
     recommendations: [
@@ -186,6 +214,10 @@ export const destinations = [
     location: "Isla Saona, La Altagracia",
     category: "Turismo Comunitario",
     image: require("../assets/destinations/08-mano-juan-saona.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g08a.jpg"),
+      require("../assets/destinations/gallery/g08b.jpg"),
+    ],
     safety:
       "Excursión familiar por mar dentro de un parque nacional. El uso del chaleco salvavidas es obligatorio durante el trayecto en embarcación.",
     recommendations: [
@@ -211,6 +243,10 @@ export const destinations = [
     location: "Bayahíbe, La Romana",
     category: "Turismo Comunitario",
     image: require("../assets/destinations/09-bayahibe.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g09a.jpg"),
+      require("../assets/destinations/gallery/g09b.jpg"),
+    ],
     safety:
       "Recorrido a pie de nivel fácil por el pueblo y el malecón. Sin exigencia física; apto para todas las edades.",
     recommendations: [
@@ -236,6 +272,10 @@ export const destinations = [
     location: "Higüey, La Altagracia",
     category: "Turismo Comunitario",
     image: require("../assets/destinations/10-higuey-basilica.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g10a.jpg"),
+      require("../assets/destinations/gallery/g10b.jpg"),
+    ],
     safety:
       "Visita cultural de nivel fácil. Al tratarse de un espacio religioso, se pide vestimenta y comportamiento respetuosos.",
     recommendations: [
@@ -261,6 +301,10 @@ export const destinations = [
     location: "Boca de Yuma, La Altagracia",
     category: "Turismo Comunitario",
     image: require("../assets/destinations/11-boca-de-yuma.jpg"),
+    gallery: [
+      require("../assets/destinations/gallery/g11a.jpg"),
+      require("../assets/destinations/gallery/g11b.jpg"),
+    ],
     safety:
       "Paseo costero y en bote de nivel fácil. El uso del chaleco salvavidas es obligatorio durante el trayecto en bote.",
     recommendations: [
