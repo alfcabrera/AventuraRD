@@ -15,6 +15,7 @@ import {
   saveReservation,
   patchReservation,
 } from "@/services/firestoreData";
+import { sendReservationStatusEmail } from "@/services/email";
 
 // Se guardan en el dispositivo (no dependen de la cuenta):
 //   - onboarding: si ya se vio la intro.
@@ -242,6 +243,7 @@ export const useAppStore = create((set, get) => ({
   },
 
   cancelReservation: (id) => {
+    const reservation = get().reservations.find((r) => r.id === id);
     const updated = get().reservations.map((r) =>
       r.id === id ? { ...r, status: "cancelada" } : r
     );
@@ -249,6 +251,16 @@ export const useAppStore = create((set, get) => ({
     if (get().user?.id)
       patchReservation(id, { status: "cancelada" }).catch((e) =>
         console.error("Failed to cancel reservation", e)
+      );
+
+    // Aviso por correo al aventurero. Variante propia porque canceló él mismo.
+    if (reservation)
+      sendReservationStatusEmail(
+        { ...reservation, status: "cancelada" },
+        destinations.find((d) => d.id === reservation.destinationId),
+        "cancelada_por_cliente"
+      ).catch((e) =>
+        console.warn("No se pudo enviar el aviso de cancelación:", e?.message || e)
       );
   },
 

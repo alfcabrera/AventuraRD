@@ -1,0 +1,158 @@
+<!--
+  Plantilla de correo — Cambio de estado de una reserva (AventuraRD)
+  Sirve para CONFIRMADA y para CANCELADA: los textos y los colores llegan como
+  variables, así que una sola plantilla cubre los dos casos.
+
+  Pégala en EmailJS (Email Templates → Create New Template → editor de código `<>`).
+  Configura en el template de EmailJS:
+    To Email:  {{to_email}}
+    Subject:   Reserva {{statusSubject}} — {{experienceTitle}} | AventuraRD
+    From Name: AventuraRD
+  Y copia su Template ID en EMAILJS_TEMPLATE_STATUS_ID (constants/email.js).
+
+  Variables (las rellena la app automáticamente):
+    {{to_email}}            Correo del cliente (destinatario)
+    {{contactName}}         Nombre del cliente
+    {{reference}}           Nº de reserva
+    {{statusSubject}}       "confirmada" | "cancelada"  (solo para el asunto)
+    {{statusBadge}}         Etiqueta del estado
+    {{statusIcon}}          Emoji del estado
+    {{statusTitle}}         Titular del correo
+    {{statusMessage}}       Párrafo principal
+    {{statusNote}}          Consejo o siguiente paso
+    {{statusAccent}}        Color principal (#2F9E62 confirmada / #EF4444 cancelada)
+    {{statusSurface}}       Color de fondo suave a juego
+    {{experienceTitle}} {{experienceLocation}} {{experienceCategory}} {{experienceDuration}}
+    {{date}} {{time}} {{people}} {{total}}
+    {{operatorName}} {{operatorContact}} {{operatorPhone}}
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F1F5F4;margin:0;padding:24px 0;font-family:Arial,Helvetica,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#FFFFFF;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background-color:{{statusAccent}};padding:28px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="font-size:20px;font-weight:bold;color:#FFFFFF;">🌿 AventuraRD</td>
+                <td align="right" style="font-size:12px;color:rgba(255,255,255,0.85);">Región Este · RD</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Hero -->
+        <tr>
+          <td style="padding:36px 32px 8px 32px;text-align:center;">
+            <div style="font-size:40px;line-height:40px;">{{statusIcon}}</div>
+            <h1 style="margin:16px 0 6px 0;font-size:22px;color:#0F172A;">{{statusTitle}}</h1>
+            <p style="margin:0;font-size:14px;color:#64748B;line-height:20px;">
+              Hola {{contactName}}, {{statusMessage}}
+            </p>
+          </td>
+        </tr>
+
+        <!-- Reference + estado -->
+        <tr>
+          <td style="padding:20px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F1F5F4;border-radius:12px;">
+              <tr>
+                <td style="padding:16px 20px;">
+                  <div style="font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:0.5px;">Nº de reserva</div>
+                  <div style="font-size:18px;font-weight:bold;color:#0F172A;letter-spacing:1px;">{{reference}}</div>
+                </td>
+                <td align="right" style="padding:16px 20px;">
+                  <span style="display:inline-block;background-color:{{statusSurface}};color:{{statusAccent}};font-size:12px;font-weight:bold;padding:6px 12px;border-radius:20px;">{{statusIcon}} {{statusBadge}}</span>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Experience -->
+        <tr>
+          <td style="padding:0 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E2E8F0;border-radius:14px;overflow:hidden;">
+              <tr>
+                <td width="70" style="background-color:{{statusSurface}};text-align:center;font-size:30px;padding:20px 0;">🏛️</td>
+                <td style="padding:14px 16px;vertical-align:top;">
+                  <div style="display:inline-block;background-color:{{statusSurface}};color:{{statusAccent}};font-size:10px;font-weight:bold;padding:3px 8px;border-radius:6px;">{{experienceCategory}}</div>
+                  <div style="margin-top:6px;font-size:16px;font-weight:bold;color:#0F172A;">{{experienceTitle}}</div>
+                  <div style="margin-top:4px;font-size:13px;color:#64748B;">📍 {{experienceLocation}}</div>
+                  <div style="margin-top:4px;font-size:13px;color:#94A3B8;">🕒 {{experienceDuration}}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Details -->
+        <tr>
+          <td style="padding:20px 32px 4px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="padding:8px 0;font-size:14px;color:#64748B;">📅 Fecha</td>
+                <td align="right" style="padding:8px 0;font-size:14px;font-weight:bold;color:#0F172A;">{{date}}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-size:14px;color:#64748B;">🕒 Horario</td>
+                <td align="right" style="padding:8px 0;font-size:14px;font-weight:bold;color:#0F172A;">{{time}}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-size:14px;color:#64748B;">👥 Personas</td>
+                <td align="right" style="padding:8px 0;font-size:14px;font-weight:bold;color:#0F172A;">{{people}}</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 0;font-size:14px;color:#64748B;">💵 Total</td>
+                <td align="right" style="padding:8px 0;font-size:16px;font-weight:bold;color:{{statusAccent}};">${{total}}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Nota / siguiente paso -->
+        <tr>
+          <td style="padding:12px 32px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:{{statusSurface}};border-radius:12px;">
+              <tr>
+                <td style="padding:14px 18px;">
+                  <div style="font-size:13px;color:#475569;line-height:20px;">💡 {{statusNote}}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Operator -->
+        <tr>
+          <td style="padding:12px 32px 24px 32px;">
+            <div style="font-size:11px;color:#94A3B8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Operador local</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #E2E8F0;border-radius:12px;">
+              <tr>
+                <td style="padding:14px 18px;">
+                  <div style="font-size:14px;font-weight:bold;color:#0F172A;">🏢 {{operatorName}}</div>
+                  <div style="margin-top:4px;font-size:13px;color:#64748B;">✉️ {{operatorContact}}</div>
+                  <div style="margin-top:2px;font-size:13px;color:#64748B;">📞 {{operatorPhone}}</div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:#0F172A;padding:24px 32px;text-align:center;">
+            <div style="font-size:14px;font-weight:bold;color:#FFFFFF;">AventuraRD</div>
+            <div style="margin-top:6px;font-size:12px;color:#94A3B8;line-height:18px;">
+              Turismo de aventura y comunitario en el Este de la República Dominicana.<br />
+              Este es un correo automático, por favor no respondas a esta dirección.
+            </div>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>

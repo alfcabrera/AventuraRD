@@ -23,6 +23,7 @@ import {
 import { destinations } from "@/data/destinations";
 import { sendReservationEmail } from "@/services/email";
 import PrimaryButton from "@components/PrimaryButton";
+import PayPalCheckoutModal from "@components/PayPalCheckoutModal";
 import { Colors } from "@constants/colors";
 import {
   PAYMENT_METHODS,
@@ -156,6 +157,7 @@ export default function ReserveScreen() {
   // Cuando hay tarjeta guardada usamos esa por defecto; si no, pediremos una nueva.
   const [useNewCard, setUseNewCard] = useState(!savedCard);
   const [cardModalOpen, setCardModalOpen] = useState(false);
+  const [paypalOpen, setPaypalOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState(user?.name || "");
@@ -260,11 +262,8 @@ export default function ReserveScreen() {
     }
 
     if (paymentMethod === "paypal") {
-      simulateAndFinalize({
-        method: "paypal",
-        status: "pagado",
-        label: "PayPal",
-      });
+      // Abre el redirect simulado de PayPal; finaliza en su onSuccess.
+      setPaypalOpen(true);
       return;
     }
 
@@ -937,6 +936,20 @@ export default function ReserveScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Redirect simulado de PayPal */}
+      <PayPalCheckoutModal
+        visible={paypalOpen}
+        amount={total}
+        merchant="AventuraRD"
+        payerEmail={email.trim()}
+        onCancel={() => setPaypalOpen(false)}
+        onSuccess={(payment) => {
+          setPaypalOpen(false);
+          // El modal ya mostró su propio "procesando", así que confirmamos directo.
+          finalizeReservation(payment);
+        }}
+      />
 
       {/* Processing overlay */}
       <Modal visible={processing} transparent animationType="fade">
